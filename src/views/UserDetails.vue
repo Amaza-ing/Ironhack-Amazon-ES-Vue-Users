@@ -1,18 +1,36 @@
 <script setup>
-import { onMounted } from "vue";
+import { onMounted, ref, watch } from "vue";
+import { useRoute } from "vue-router";
 import { useUserStore } from "@/stores/userStore";
 import HeaderComponent from "@/components/HeaderComponent.vue";
 
+const route = useRoute();
+
 const userStore = useUserStore();
 
-onMounted(async () => {
-  await userStore.getUsers();
+onMounted(() => {
+  const id = route.params.id;
+  userStore.getUser(id);
 });
+
+watch(
+  () => route.params.id,
+  () => {
+    const id = route.params.id;
+    userStore.getUser(id);
+  }
+);
 </script>
 
 <template>
   <HeaderComponent></HeaderComponent>
-  <h2>HOME</h2>
+
+  <section v-if="userStore.selectedUser" class="user-details">
+    <h2>{{ userStore.selectedUser.name }}</h2>
+    <h3>{{ userStore.selectedUser.email }}</h3>
+    <h3>{{ userStore.selectedUser.phone }}</h3>
+    <h3>{{ userStore.selectedUser.website }}</h3>
+  </section>
 
   <ul class="user-list">
     <li v-for="user in userStore.users" :key="user.id">
@@ -30,26 +48,7 @@ onMounted(async () => {
 </template>
 
 <style>
-.user-list {
-  margin: 0;
-  padding: 0;
-  list-style: none;
-
-  .link {
-    color: black;
-    text-decoration: none;
-  }
-
-  .user-container {
-    background-color: teal;
-    padding-left: 20px;
-    display: flex;
-    gap: 20px;
-    border-bottom: 3px solid black;
-  }
-  .user-container:hover {
-    background-color: darkgray;
-    cursor: pointer;
-  }
+.user-details {
+  margin-bottom: 200px;
 }
 </style>
